@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pengeluaran | DataNyoi</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        background-color: rgb(172, 206, 219);
+      }
+
+      .linkout,
+      .Out {
+        text-decoration: none;
+        color: black;
+        list-style-type: none;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar bg-body-tertiary">
+      <div class="container-fluid justify-content-start">
+        <button class="btn btn-outline-success me-2" type="button">
+          Pengeluaran
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" type="button">
+          <li class="linkout">
+            <a class="Out" href="index.html">Pemasukan</a>
+          </li>
+        </button>
+      </div>
+    </nav>
+    <div id="alert-container" class="container mt-3"></div>
+
+    <div class="container">
+      <form
+        name="submit-to-google-sheet"
+        class="p-4 p-md-5 bg-white rounded shadow-lg my-5"
+      >
+        <h3 class="mb-4 text-primary font-semibold underline">Pengeluaran</h3>
+        <div class="mb-3">
+          <label
+            for="inputTanggal"
+            class="form-label text-xl font-semibold mb-2 border-b pb-1"
+            >Tanggal</label
+          >
+          <input
+            name="Tanggal"
+            type="date"
+            class="form-control"
+            id="inputTanggal"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label
+            for="inputKeterangan"
+            class="form-label text-xl font-semibold mb-2 border-b pb-1"
+            >Keterangan</label
+          >
+          <select
+            name="Keterangan"
+            id="inputKeterangan"
+            class="form-select"
+            required
+          >
+            <option value="" disabled selected>Pilih Keterangan...</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label
+            for="inputNominal"
+            class="form-label text-xl font-semibold mb-2 border-b pb-1"
+            >Nominal</label
+          >
+          <input
+            name="Nominal"
+            type="number"
+            class="form-control"
+            id="inputNominal"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+
+    <script>
+      const scriptURL =
+        "https://script.google.com/macros/s/AKfycbxqENSzCts4VAAJ7z9YegGvrXcEyZyyLt0aYWraUhB_VTQv5KUW53bKxvDaXNh6f7uh3Q/exec";
+      // PERBAIKAN: Memastikan form yang benar dipilih
+      const form = document.forms["submit-to-google-sheet"];
+      const submitButton = form.querySelector('button[type="submit"]');
+      const alertContainer = document.getElementById("alert-container");
+
+      const showAlert = (message, type) => {
+        alertContainer.innerHTML = `
+          <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        `;
+      };
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        submitButton.disabled = true; // Nonaktifkan tombol saat loading
+        submitButton.textContent = "Mengirim...";
+
+        fetch(scriptURL, { method: "POST", body: new FormData(form) })
+          .then((response) => {
+            if (response.ok) {
+              showAlert("✅ Data berhasil dikirimkan ke Data Base!", "success");
+              form.reset(); // Kosongkan formulir setelah berhasil
+            } else {
+              throw new Error("Gagal mengirim data. Respon server tidak OK.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error!", error.message);
+            showAlert(
+              "❌ Terjadi kesalahan saat mengirim data. Coba lagi. Detail: " +
+                error.message,
+              "danger"
+            );
+          })
+          .finally(() => {
+            submitButton.disabled = false; // Aktifkan kembali tombol
+            submitButton.textContent = "Submit";
+          });
+      });
+    </script>
+  </body>
+</html>
